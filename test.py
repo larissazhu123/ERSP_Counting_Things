@@ -101,27 +101,27 @@ with open("./extractedStrawberries.txt", "r",) as f:
 # csv_writer.writerow(fields)
 ##### 
 
-### Read from CSV and extract into a data structure 
-data_struct = {}
-with open('./strawberries.csv', 'r',) as csv_file:
-    csv_reader = csv.DictReader(csv_file)
-    for row in csv_reader:
-        fileName= row['image_id']
-        approximate_count = float(row['approximate_count'])
-        trueCount = float(row['true_count'])
+# ### Read from CSV and extract into a data structure 
+# data_struct = {}
+# with open('./strawberries.csv', 'r',) as csv_file:
+#     csv_reader = csv.DictReader(csv_file)
+#     for row in csv_reader:
+#         fileName= row['image_id']
+#         approximate_count = float(row['approximate_count'])
+#         trueCount = float(row['true_count'])
 
-        data_row = {
-            'fileName': fileName,
-            'approxCounts': approximate_count,
-            'true_count': trueCount
-        }
+#         data_row = {
+#             'fileName': fileName,
+#             'approxCounts': approximate_count,
+#             'true_count': trueCount
+#         }
 
-        data_struct.append(data_row)
+#         data_struct.append(data_row)
 
 
 
-approx_counts = [row['approximate_count'] for row in data_struct]
-covariate = approx_counts
+# approx_counts = [row['approximate_count'] for row in data_struct]
+# covariate = approx_counts
 
 pbar = tqdm(im_ids)
 # pbar = '285.ipg'
