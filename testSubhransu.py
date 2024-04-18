@@ -22,7 +22,6 @@ import numpy as np
 from tqdm import tqdm
 from os.path import exists
 import torch.optim as optim
-import csv
 
 
 parser = argparse.ArgumentParser(description="Few Shot Counting Evaluation code")
@@ -43,17 +42,6 @@ data_split_file = data_path + 'Train_Test_Val_FSC_147.json'
 im_dir = data_path + 'images_384_VarV2'
 
 if not exists(anno_file) or not exists(im_dir):
-
-    if not exists(anno_file) and not exists(im_dir):
-        print("both do not exist")
-
-    elif not exists(anno_file):
-        print("The anno file doest exit")
-
-    elif not exists (im_dir):
-        print("the img dire doesnt exist")
-
-
     print("Make sure you set up the --data-path correctly.")
     print("Current setting is {}, but the image dir and annotation file do not exist.".format(args.data_path))
     print("Aborting the evaluation")
@@ -87,22 +75,16 @@ cnt = 0
 SAE = 0  # sum of absolute errors
 SSE = 0  # sum of square errors
 
-print("Evaluation on {} data".format(args.test_split))
-# im_ids = data_split[args.test_split]
 im_ids = None
 with open("./extractedStrawberries.txt", "r",) as f:
     im_ids = f.readlines()
     im_ids = [_id.replace('\n', '') for _id in im_ids]
 
-# CSV
-into_csv_buffer = open("./strawberries.csv", "a+", newline="")
-fields = ['image_id', 'approximate_count', 'true_count']
-csv_writer = csv.writer(into_csv_buffer)
-csv_writer.writerow(fields)
-##### 
-
 pbar = tqdm(im_ids)
-# pbar = '285.ipg'
+
+#print("Evaluation on {} data".format(args.test_split))
+#im_ids = data_split[args.test_split]
+pbar = tqdm(im_ids)
 for im_id in pbar:
     anno = annotations[im_id]
     bboxes = anno['box_examples_coordinates']
@@ -147,6 +129,11 @@ for im_id in pbar:
         features.required_grad = False
         output = adapted_regressor(features)
 
+    rslt_file = "{}/{}_out.png".format('test_run',im_id)
+    visualize_output_and_save(image.detach().cpu(), output.detach().cpu(), boxes.cpu(), rslt_file)
+    print("===> Visualized output is saved to {}".format(rslt_file))
+
+
     gt_cnt = dots.shape[0]
     pred_cnt = output.sum().item()
     cnt = cnt + 1
@@ -158,11 +145,4 @@ for im_id in pbar:
                          format(im_id, gt_cnt, pred_cnt, abs(pred_cnt - gt_cnt), SAE/cnt, (SSE/cnt)**0.5))
     print("")
 
-    # write into csv
-    csv_writer.writerow([im_id, pred_cnt, gt_cnt])
-
 print('On {} data, MAE: {:6.2f}, RMSE: {:6.2f}'.format(args.test_split, SAE/cnt, (SSE/cnt)**0.5))
-
-rslt_file = "{}/{}_out.png".format(args.output_dir, im_id)
-visualize_output_and_save(image.detach().cpu(), output.detach().cpu(), boxes.cpu(), rslt_file)
-print("===> Visualized output is saved to {}".format(rslt_file))
