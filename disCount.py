@@ -11,15 +11,11 @@ for i, tempDict in enumerate(dectetorResult):
 
 #normalize our covariate
 q = covariate / np.sum(covariate)
-# i = 0
-# for count in q:
-#     i += count
-# print(i) #close to 1, but not exactly
+
 
 N = 169 #total number of images
 human_verified_size = set({3, 5, 10, 15}) #choices of size of huma verfied samples
 
-#Currently testing with k = 3 first
 for k in human_verified_size:   
 #return some index sample from the distribution
     samples = list(np.random.choice(np.arange(N), k, p = q, replace = True))
