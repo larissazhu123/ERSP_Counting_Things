@@ -60,7 +60,7 @@ def run_dis_count(k):
 k_coordinates = []
 error_rate_coordiantes = []
 
-set_of_k_values = set({3, 5, 10, 15})
+set_of_k_values = set({3, 5, 10, 15,20})
 
 for k in set_of_k_values:
     time.sleep(1)
@@ -71,4 +71,7 @@ for k in set_of_k_values:
 fig, axes = plt.subplots(1, 1, figsize = (10, 10))
 plt.plot(np.array(k_coordinates), np.array(error_rate_coordiantes))
 plt.title("Relationship between error rate and number of samples verfied by human")
+axes.set_xlabel("Number of samples verified by human")
+axes.set_ylabel("Error rate (in percentage)")
+axes.set_xticks([0, 5, 10, 15, 20])
 plt.show()
