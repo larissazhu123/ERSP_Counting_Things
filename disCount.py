@@ -33,8 +33,8 @@ for index, img in enumerate(numpy_images):
     curIndex += 1
 plt.show()
 
-#TODO: get input of count for each image
-f_s_i = []
+#here instead of us manually counting, we already got the true count, just retrieve it directly and put into the array
+f_s_i = [int(dectetorResult[x]["true_count"]) for x in samples]
 
 w_bar = 0
 for i, s_i in enumerate(samples):
@@ -42,3 +42,16 @@ for i, s_i in enumerate(samples):
 F_hat = np.sum(covariate)*w_bar/len(samples) # count estimate: F_hat = G(S)*1/n*w_bar(S)
 print('Estimated number of objects: %d (true count: %d)'%(F_hat, F))
 
+# Calculating confidence intervals
+w_ci = 0
+for i, s_i in enumerate(samples):
+  w_ci += (np.sum(covariate)*f_s_i[i]/covariate.flatten()[s_i] - F_hat)**2
+var_hat = w_ci/len(samples) # estimated variance
+CI = 1.96*np.sqrt(var_hat/len(samples)) # 95% confidence intervals
+
+# And here we calculate the error
+Error = np.abs(F - F_hat)/F
+print('Error rate: %.2f%%'%(Error*100.))
+print('Estimate: %d \u00B1 %d'%(F_hat, CI))
+
+#TODO: essentially do the same thing for different k values, record pair (k, error_rate) to construct the graph between k and error rate
