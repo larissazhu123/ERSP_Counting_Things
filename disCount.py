@@ -1,5 +1,6 @@
 from helper import readFromcsv, retreive_image, groundTruth
 import numpy as np
+import time
 import matplotlib.pyplot as plt
 #! Note: since this is a just a count (a number), not a tile like in Guastavo's tutorial,
 #! I use a single vector to represent our covariate, not sure if this is correct yet 
@@ -17,7 +18,9 @@ N = 169 #total number of images
 true_total_strawberries = groundTruth()
 F = true_total_strawberries
 
+#!Running dis_count on here
 def run_dis_count(k):
+    print(f"______DISCOUNT RUN WITH K = {k}______")
     samples = list(np.random.choice(np.arange(N), k, p = q, replace = True))
     sampled_image = [dectetorResult[x]["image_id"] for x in samples]
     numpy_images = retreive_image(sampled_image)
@@ -33,22 +36,39 @@ def run_dis_count(k):
     #here instead of us manually counting, we already got the true count, just retrieve it directly and put into the array
     f_s_i = [int(dectetorResult[x]["true_count"]) for x in samples]
 
+    #!Formula to calculate error rate, CI are copied from Guastavo's tutorial
     w_bar = 0
     for i, s_i in enumerate(samples):
-    w_bar += f_s_i[i]/covariate.flatten()[s_i] # w_bar(S) = \sum(f/g)
+        w_bar += f_s_i[i]/covariate.flatten()[s_i] # w_bar(S) = \sum(f/g)
     F_hat = np.sum(covariate)*w_bar/len(samples) # count estimate: F_hat = G(S)*1/n*w_bar(S)
     print('Estimated number of objects: %d (true count: %d)'%(F_hat, F))
 
     # Calculating confidence intervals
     w_ci = 0
     for i, s_i in enumerate(samples):
-    w_ci += (np.sum(covariate)*f_s_i[i]/covariate.flatten()[s_i] - F_hat)**2
+        w_ci += (np.sum(covariate)*f_s_i[i]/covariate.flatten()[s_i] - F_hat)**2
     var_hat = w_ci/len(samples) # estimated variance
     CI = 1.96*np.sqrt(var_hat/len(samples)) # 95% confidence intervals
 
-# And here we calculate the error
-Error = np.abs(F - F_hat)/F
-print('Error rate: %.2f%%'%(Error*100.))
-print('Estimate: %d \u00B1 %d'%(F_hat, CI))
+    # And here we calculate the error
+    Error = np.abs(F - F_hat)/F
+    print('Error rate: %.2f%%'%(Error*100.))
+    print('Estimate: %d \u00B1 %d'%(F_hat, CI))
+    return (k , Error * 100)
 
-#TODO: essentially do the same thing for different k values, record pair (k, error_rate) to construct the graph between k and error rate
+
+k_coordinates = []
+error_rate_coordiantes = []
+
+set_of_k_values = set({3, 5, 10, 15})
+
+for k in set_of_k_values:
+    time.sleep(1)
+    cur = run_dis_count(k)
+    k_coordinates.append(cur[0])
+    error_rate_coordiantes.append(cur[1])
+
+fig, axes = plt.subplots(1, 1, figsize = (10, 10))
+plt.plot(np.array(k_coordinates), np.array(error_rate_coordiantes))
+plt.title("Relationship between error rate and number of samples verfied by human")
+plt.show()
