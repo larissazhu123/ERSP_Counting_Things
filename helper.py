@@ -3,6 +3,7 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
+import functools
 
 #return a list of DictRead object where each object will have the following field: image_id, approximate_count, true_count
 def readFromcsv() -> list[dict]:
@@ -19,6 +20,12 @@ def retreive_image(list_of_image_ids : list[str]):
         curImg = Image.open(path)
         res.append(np.array(curImg))
     return res
+
+#return total number of strawberry
+def groundTruth() -> int:
+    tempList = readFromcsv()
+    return functools.reduce(lambda a, b: a + b, [float(x["true_count"]) for x in tempList])
+
 
 #if run this file directly
 if (__name__ == "__main__"):
