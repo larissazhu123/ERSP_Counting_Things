@@ -14,40 +14,37 @@ q = covariate / np.sum(covariate)
 
 
 N = 169 #total number of images
-human_verified_size = set({3, 5, 10}) #choices of size of huma verfied samples
 true_total_strawberries = groundTruth()
 F = true_total_strawberries
 
-# for k in human_verified_size:   
-#return some index sample from the distribution
-k = 3
-samples = list(np.random.choice(np.arange(N), k, p = q, replace = True))
-sampled_image = [dectetorResult[x]["image_id"] for x in samples]
-numpy_images = retreive_image(sampled_image)
-fig, ax = plt.subplots(1, k, figsize = (20, 10)) #create a Figure object with k slots, size is 20 inches width, 10 inches height
-curIndex = 0
-for index, img in enumerate(numpy_images):
-    ax[curIndex].imshow(img)
-    ax[curIndex].axis("off")
-    ax[curIndex].set_title(f"Image {curIndex}")
-    curIndex += 1
-plt.show()
+def run_dis_count(k):
+    samples = list(np.random.choice(np.arange(N), k, p = q, replace = True))
+    sampled_image = [dectetorResult[x]["image_id"] for x in samples]
+    numpy_images = retreive_image(sampled_image)
+    fig, ax = plt.subplots(1, k, figsize = (20, 10)) #create a Figure object with k slots, size is 20 inches width, 10 inches height
+    curIndex = 0
+    for index, img in enumerate(numpy_images):
+        ax[curIndex].imshow(img)
+        ax[curIndex].axis("off")
+        ax[curIndex].set_title(f"Image {curIndex}")
+        curIndex += 1
+    plt.show()
 
-#here instead of us manually counting, we already got the true count, just retrieve it directly and put into the array
-f_s_i = [int(dectetorResult[x]["true_count"]) for x in samples]
+    #here instead of us manually counting, we already got the true count, just retrieve it directly and put into the array
+    f_s_i = [int(dectetorResult[x]["true_count"]) for x in samples]
 
-w_bar = 0
-for i, s_i in enumerate(samples):
-  w_bar += f_s_i[i]/covariate.flatten()[s_i] # w_bar(S) = \sum(f/g)
-F_hat = np.sum(covariate)*w_bar/len(samples) # count estimate: F_hat = G(S)*1/n*w_bar(S)
-print('Estimated number of objects: %d (true count: %d)'%(F_hat, F))
+    w_bar = 0
+    for i, s_i in enumerate(samples):
+    w_bar += f_s_i[i]/covariate.flatten()[s_i] # w_bar(S) = \sum(f/g)
+    F_hat = np.sum(covariate)*w_bar/len(samples) # count estimate: F_hat = G(S)*1/n*w_bar(S)
+    print('Estimated number of objects: %d (true count: %d)'%(F_hat, F))
 
-# Calculating confidence intervals
-w_ci = 0
-for i, s_i in enumerate(samples):
-  w_ci += (np.sum(covariate)*f_s_i[i]/covariate.flatten()[s_i] - F_hat)**2
-var_hat = w_ci/len(samples) # estimated variance
-CI = 1.96*np.sqrt(var_hat/len(samples)) # 95% confidence intervals
+    # Calculating confidence intervals
+    w_ci = 0
+    for i, s_i in enumerate(samples):
+    w_ci += (np.sum(covariate)*f_s_i[i]/covariate.flatten()[s_i] - F_hat)**2
+    var_hat = w_ci/len(samples) # estimated variance
+    CI = 1.96*np.sqrt(var_hat/len(samples)) # 95% confidence intervals
 
 # And here we calculate the error
 Error = np.abs(F - F_hat)/F
