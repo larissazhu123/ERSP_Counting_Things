@@ -21,7 +21,7 @@ F = true_total_strawberries
 #!Running dis_count on here
 def run_dis_count(k):
     print(f"______DISCOUNT RUN WITH K = {k}______")
-    samples = list(np.random.choice(np.arange(N), k, p = q.flatten(), replace = True))
+    samples = list(np.random.choice(np.arange(N), k, p = q, replace = True))
     sampled_image = [dectetorResult[x]["image_id"] for x in samples]
     numpy_images = retreive_image(sampled_image)
     fig, ax = plt.subplots(1, k, figsize = (20, 10)) #create a Figure object with k slots, size is 20 inches width, 10 inches height
@@ -66,6 +66,12 @@ for k in set_of_k_values:
     cur = run_dis_count(k)
     k_coordinates.append(cur[0])
     error_rate_coordiantes.append(cur[1])
+
+
+with open("result_runnning_discount.txt", "w") as file:
+    for i in range(len(k_coordinates)):
+        file.write(f"k = {k_coordinates[i]}, associated error_rate = {error_rate_coordiantes[i]}\n")
+    
 
 fig, axes = plt.subplots(1, 1, figsize = (15, 15))
 plt.plot(np.array(k_coordinates), np.array(error_rate_coordiantes))
