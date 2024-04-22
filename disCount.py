@@ -21,7 +21,7 @@ F = true_total_strawberries
 #!Running dis_count on here
 def run_dis_count(k):
     print(f"______DISCOUNT RUN WITH K = {k}______")
-    samples = list(np.random.choice(np.arange(N), k, p = q, replace = True))
+    samples = list(np.random.choice(np.arange(N), k, p = q.flatten(), replace = True))
     sampled_image = [dectetorResult[x]["image_id"] for x in samples]
     numpy_images = retreive_image(sampled_image)
     fig, ax = plt.subplots(1, k, figsize = (20, 10)) #create a Figure object with k slots, size is 20 inches width, 10 inches height
@@ -60,15 +60,14 @@ def run_dis_count(k):
 k_coordinates = []
 error_rate_coordiantes = []
 
-set_of_k_values = set({3, 5, 10, 15,20})
+set_of_k_values = [3, 5, 10, 12, 15, 17, 21, 25, 27, 30, 33, 38, 41, 45, 48, 51, 54, 57, 60]
 
 for k in set_of_k_values:
-    time.sleep(1)
     cur = run_dis_count(k)
     k_coordinates.append(cur[0])
     error_rate_coordiantes.append(cur[1])
 
-fig, axes = plt.subplots(1, 1, figsize = (10, 10))
+fig, axes = plt.subplots(1, 1, figsize = (15, 15))
 plt.plot(np.array(k_coordinates), np.array(error_rate_coordiantes))
 plt.title("Relationship between error rate and number of samples verfied by human")
 axes.set_xlabel("Number of samples verified by human")
