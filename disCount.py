@@ -67,10 +67,6 @@ for k in set_of_k_values:
     k_coordinates.append(cur[0])
     error_rate_coordiantes.append(cur[1])
 
-
-with open("result_runnning_discount.txt", "w") as file:
-    for i in range(len(k_coordinates)):
-        file.write(f"k = {k_coordinates[i]}, associated error_rate = {error_rate_coordiantes[i]}\n")
     
 
 fig, axes = plt.subplots(1, 1, figsize = (15, 15))
