@@ -1,8 +1,11 @@
+"""""
+This file is for the new disCount, in which for each k we would want to run 100 trials and record the mean error
+"""
+
 from helper import readFromcsv, retreive_image, groundTruth
 import numpy as np
 import matplotlib.pyplot as plt
-#! Note: since this is a just a count (a number), not a tile like in Guastavo's tutorial,
-#! I use a single vector to represent our covariate, not sure if this is correct yet 
+
 #initialize covariate (detector count)
 covariate = np.zeros((169))
 dectetorResult = readFromcsv()
@@ -17,22 +20,12 @@ N = 169 #total number of images
 true_total_strawberries = groundTruth()
 F = true_total_strawberries
 
-#!Running dis_count on here
+#TODO: modify this code so that each k will be running with 100 trials, return (k, mean_of_all_error_trials)
 def run_dis_count(k):
     print(f"______DISCOUNT RUN WITH K = {k}______")
     samples = list(np.random.choice(np.arange(N), k, p = q, replace = True))
     sampled_image = [dectetorResult[x]["image_id"] for x in samples]
-    numpy_images = retreive_image(sampled_image)
-    fig, ax = plt.subplots(1, k, figsize = (20, 10)) #create a Figure object with k slots, size is 20 inches width, 10 inches height
-    curIndex = 0
-    for index, img in enumerate(numpy_images):
-        ax[curIndex].imshow(img)
-        ax[curIndex].axis("off")
-        ax[curIndex].set_title(f"Image {curIndex}")
-        curIndex += 1
-    plt.show()
-
-    #here instead of us manually counting, we already got the true count, just retrieve it directly and put into the array
+    
     f_s_i = [int(dectetorResult[x]["true_count"]) for x in samples]
 
     #!Formula to calculate error rate, CI are copied from Guastavo's tutorial
