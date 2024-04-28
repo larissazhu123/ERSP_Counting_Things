@@ -5,6 +5,9 @@ This file is for the new disCount, in which for each k we would want to run 100 
 from helper import readFromcsv, retreive_image, groundTruth
 import numpy as np
 import matplotlib.pyplot as plt
+import skimage as ski
+from skimage import data
+from skimage.color import rgb2hsv
 
 #initialize covariate (detector count)
 covariate = np.zeros((169))
@@ -13,7 +16,7 @@ for i, tempDict in enumerate(dectetorResult):
     covariate[i] = float(tempDict["approximate_count"])
 
 #normalize our covariate
-q = covariate / np.sum(covariate)
+q= covariate / np.sum(covariate)
 
 
 N = 169 #total number of images
@@ -21,7 +24,7 @@ true_total_strawberries = groundTruth()
 F = true_total_strawberries
 
 #TODO: modify this code so that each k will be running with 100 trials, return (k, mean_of_all_error_trials)
-def run_dis_count(k, trials = 100):
+def run_dis_count(k, trials = 1000):
     error_rates = []
     print(f"______DISCOUNT RUN WITH K = {k}______")
     for _ in range(trials):
@@ -65,12 +68,24 @@ error_rate_coordiantes = []
 set_of_k_values = [3, 5, 10, 12, 15, 17, 21, 25, 27, 30, 33, 38, 41, 45, 48, 51, 54, 57, 60]
 
 
+
 for k in set_of_k_values:
     cur = run_dis_count(k)
     k_coordinates.append(cur[0])
     error_rate_coordiantes.append(cur[1])
 
+
+
+
+
+
+
     
+def run_is_iscount_w_cov(k, trials = 1000):
+    error_rates = []
+    print(f"______DISCOUNT RUN WITH K = {k}______")
+
+
 
 fig, axes = plt.subplots(1, 1, figsize = (15, 15))
 plt.plot(np.array(k_coordinates), np.array(error_rate_coordiantes))
