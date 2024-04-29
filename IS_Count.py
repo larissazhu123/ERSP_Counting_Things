@@ -5,38 +5,36 @@ from helper import readFromcsv, retreive_image, groundTruth
 import skimage as ski
 import numpy as np
 
-#initialize covariate (red pixels count)
-covariate = np.zeros((169)) 
-image_data = readFromcsv()
-image_strawberries_ids = [x["image_id"] for x in image_data]
 
-#retrieve each image and convert them to hsv
-img_arr = retreive_image(image_strawberries_ids)
-hsv_img_arr = list(map(lambda rgb_img : ski.color.rgb2hsv(rgb_img), img_arr))
-hue_img = list(map(lambda hsv_img : hsv_img[:,:,0], hsv_img_arr))
 
-#count red pixels
-for i, hue in enumerate(hue_img):
-    cur = 0
-    for row in hue:
-        for pixel in row:
-            if pixel > 0.95 or pixel < 0.04:
-                cur += 1
-    covariate[i] = int(cur)
-
-#normalize our covariate
-q= covariate / np.sum(covariate)
-
-N = 169 #total number of images
-true_total_strawberries = groundTruth()
-F = true_total_strawberries
 
 def run_is_count(k, trials = 1000):
+    covariate = np.zeros((169)) 
+    image_data = readFromcsv()
+    image_strawberries_ids = [x["image_id"] for x in image_data]
+
+    #retrieve each image and convert them to hsv
+    img_arr = retreive_image(image_strawberries_ids)
+    hsv_img_arr = list(map(lambda rgb_img : ski.color.rgb2hsv(rgb_img), img_arr))
+    hue_img = list(map(lambda hsv_img : hsv_img[:,:,0], hsv_img_arr))
+
+    #count red pixels
+    for i, hue in enumerate(hue_img):
+        cur = 0
+        for row in hue:
+            for pixel in row:
+                if pixel > 0.95 or pixel < 0.04:
+                    cur += 1
+        covariate[i] = int(cur)
+    #normalize our covariate  
+    q = covariate / np.sum(covariate)
+    N = 169 #total number of images
+    true_total_strawberries = groundTruth()
+    F = true_total_strawberries
     error_rates = []
     print(f"______ISCOUNT RUN WITH K = {k}______")
     for _ in range(trials):
         samples = list(np.random.choice(np.arange(N), k, p = q, replace = True))
-        sampled_image = [image_strawberries_ids[x] for x in samples]
         
         f_s_i = [int(image_data[x]["true_count"]) for x in samples]
 
@@ -45,7 +43,7 @@ def run_is_count(k, trials = 1000):
         for i, s_i in enumerate(samples):
             w_bar += f_s_i[i]/covariate.flatten()[s_i] # w_bar(S) = \sum(f/g)
         F_hat = np.sum(covariate)*w_bar/len(samples) # count estimate: F_hat = G(S)*1/n*w_bar(S)
-        print('Estimated number of objects: %d (true count: %d)'%(F_hat, F))
+        # print('Estimated number of objects: %d (true count: %d)'%(F_hat, F))
 
         # Calculating confidence intervals
         w_ci = 0
@@ -59,7 +57,7 @@ def run_is_count(k, trials = 1000):
 
     # let's get the mean error
     mean_error = np.mean(error_rates)
-    print(f"Mean Error rate for {k}:", mean_error)
+    # print(f"Mean Error rate for {k}:", mean_error)
     return (k, mean_error)
 
 k_coordinates = []
@@ -82,3 +80,5 @@ axes.set_xlabel("Number of samples verified by human")
 axes.set_ylabel("Error rate (in percentage)")
 axes.set_xticks([0, 5, 10, 15, 20])
 plt.show()
+
+
