@@ -7,7 +7,6 @@ from helper import readFromcsv, retreive_image, groundTruth
 import numpy as np
 import matplotlib.pyplot as plt
 
-covariate = np.zeros((169))
 dectetorResult = readFromcsv()
 
 N = 169 #total number of images
@@ -21,22 +20,41 @@ def get_tiles_from_image(im, tile_size=50):
             tiles.append(im[i:i+tile_size, j:j+tile_size])
     return tiles
 
-def runMonte(k, trials = 1000):
-    print(f"______RUN WITH K = {k}______")
+
+def monte_carlo(k, trials = 1000):
     error_rates = []
+    print(f"______MONTE CARLO RUN WITH K = {k}______")
     for _ in range(trials):
-        N = 20**2 # total number of tiles assuming a tile size of 50x50
+        samples = list(np.random.choice(np.arange(N), k))
+        f_s_i = [int(dectetorResult[x]["true_count"]) for x in samples] #pull the true count of strawberries
+        F_hat = N * np.mean(f_s_i)
+        err = np.abs(F-F_hat) / F
+        error_rates.append(err * 100)
 
-        fig, ax = plt.subplots(1, 1, figsize=(20,20))
-        for i, img in range(enumerate()):
-            plt.axvline(x=i, color='white')
-            plt.axhline(y=i, color='white')
+    mean_error = np.mean(error_rates)
+    print(f"Mean error rate: {mean_error}%")
+    return (k, mean_error)
 
-    n = 5
-    test = np.arange(N)
 
-    sampleIMGS = list(np.random.choice(np.arange(N), k, replace = True))
-    sampled_image = [dectetorResult[x]["image_id"] for x in sampleIMGS]
+k_coordinates = []
+error_rate_coordiantes = []
 
-    samplesTILES = choices(np.arange(N), k=n) # this will sample uniformly random n tiles with repetition
-    f_s_i = [int(dectetorResult[x]["true_count"]) for x in samples]
+set_of_k_values = [3, 5, 10, 12, 15, 17, 21, 25, 27, 30, 33, 38, 41, 45, 48, 51, 54, 57, 60]
+
+
+
+for k in set_of_k_values:
+    cur = monte_carlo(k)
+    k_coordinates.append(cur[0])
+    error_rate_coordiantes.append(cur[1])
+
+fig, axes = plt.subplots(1, 1, figsize = (15, 15))
+plt.plot(np.array(k_coordinates), np.array(error_rate_coordiantes))
+plt.title("Relationship between error rate and number of samples verfied by human")
+axes.set_xlabel("Number of samples verified by human")
+axes.set_ylabel("Error rate (in percentage)")
+axes.set_xticks([0, 5, 10, 15, 20])
+plt.show()
+
+
+
