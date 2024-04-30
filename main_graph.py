@@ -1,14 +1,11 @@
 import matplotlib.pyplot as plt
-from new_disCount import run_dis_count
-from IS_Count import run_is_count
-from monte_carlo import monte_carlo
 import numpy as np
 import skimage as ski
 from helper import groundTruth, readFromcsv, retreive_image
 
 
-is_count_covariate = np.zeros((169))
-discount_covariate = np.zeros((169))
+is_count_temp = np.zeros((169))
+discount_temp = np.zeros((169))
 N = 169
 F = groundTruth()
 image_data = readFromcsv()
@@ -24,17 +21,17 @@ for i, hue in enumerate(hue_img):
     cur = 0
     for row in hue:
         for pixel in row:
-            if pixel > 0.95 or pixel < 0.04:
+            if ( 0.95 <= pixel <= 1) or (0 <= pixel <= 0.04):
                 cur += 1
-    is_count_covariate[i] = int(cur)
+    is_count_temp[i] = int(cur)
 
-is_count_covariate = is_count_covariate / np.sum(is_count_covariate)
+is_count_covariate = is_count_temp / np.sum(is_count_temp)
 
 #initialize discount covariate (detector count)
 for i, tempDict in enumerate(image_data):
-    discount_covariate[i] = float(tempDict["approximate_count"])
+    discount_temp[i] = float(tempDict["approximate_count"])
 
-discount_covariate = discount_covariate / np.sum(discount_covariate)
+discount_covariate = discount_temp / np.sum(discount_temp)
 
 
 def run_3_method(k, trials = 1000):
@@ -59,7 +56,6 @@ def run_3_method(k, trials = 1000):
         for i, s_i in enumerate(samples_is_count):
             w_bar += f_s_i[i]/is_count_covariate.flatten()[s_i] 
         F_hat = np.sum(is_count_covariate)*w_bar/len(samples_is_count) 
-        print('Estimated number of objects: %d (true count: %d)'%(F_hat, F))
         w_ci = 0
         for i, s_i in enumerate(samples_is_count):
             w_ci += (np.sum(is_count_covariate)*f_s_i[i]/is_count_covariate.flatten()[s_i] - F_hat)**2
@@ -76,7 +72,6 @@ def run_3_method(k, trials = 1000):
         for i, s_i in enumerate(samples_discount):
             w_bar += f_s_i[i]/discount_covariate.flatten()[s_i] 
         F_hat = np.sum(discount_covariate)*w_bar/len(samples_discount) 
-        print('Estimated number of objects: %d (true count: %d)'%(F_hat, F))
         w_ci = 0
         for i, s_i in enumerate(samples_discount):
             w_ci += (np.sum(discount_covariate)*f_s_i[i]/discount_covariate.flatten()[s_i] - F_hat)**2
@@ -88,26 +83,27 @@ def run_3_method(k, trials = 1000):
     return (k, np.mean(monte_carlo_error_rates), np.mean(is_count_error_rates), np.mean(discount_error_rates))
 
 
-
-
-
-k_vals = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50}
+k_vals = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
 k_coordinates = []
 monte_carlo_error_rates = []
 is_count_error_rates = []
 discount_error_rates = []
 for k in k_vals:
     temp = run_3_method(k)
-    k_coordinates.append(temp[0])
+    k_coordinates.append(k)
     monte_carlo_error_rates.append(temp[1])
     is_count_error_rates.append(temp[2])
     discount_error_rates.append(temp[3])
 
 #plotting 
 fig, axes = plt.subplots(1, 1, figsize = (15, 15))
-axes.plot(np.array(k_coordinates), np.array(monte_carlo_error_rates), label = "Monte Carlo")
-axes.plot(np.array(k_coordinates), np.array(is_count_error_rates), label = "IS Count")
+axes.plot(np.array(k_coordinates), np.array(monte_carlo_error_rates),"ko--", label = "Monte Carlo")
+axes.plot(np.array(k_coordinates), np.array(is_count_error_rates), "kx-", label = "IS Count")
 axes.plot(np.array(k_coordinates), np.array(discount_error_rates), label = "Discount")
+axes.set_xlabel("Number of samples verified by humans")
+axes.set_ylabel("Error rate (%)") 
+plt.legend()
+plt.show()
     
 
 
