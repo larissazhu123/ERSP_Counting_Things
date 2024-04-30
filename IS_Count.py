@@ -1,37 +1,44 @@
-"""""
-This file is for the new disCount, in which for each k we would want to run 100 trials and record the mean error
-"""
+#choose intepreter of anaconda before running this
 
+from matplotlib import pyplot as plt
 from helper import readFromcsv, retreive_image, groundTruth
-import numpy as np
-import matplotlib.pyplot as plt
 import skimage as ski
-from skimage import data
-from skimage.color import rgb2hsv
+import numpy as np
 
-#initialize covariate (detector count)
-covariate = np.zeros((169))
-dectetorResult = readFromcsv()
-for i, tempDict in enumerate(dectetorResult):
-    covariate[i] = float(tempDict["approximate_count"])
+#initialize covariate (red pixels count)
+covariate = np.zeros((169)) 
+image_data = readFromcsv()
+image_strawberries_ids = [x["image_id"] for x in image_data]
+
+#retrieve each image and convert them to hsv
+img_arr = retreive_image(image_strawberries_ids)
+hsv_img_arr = list(map(lambda rgb_img : ski.color.rgb2hsv(rgb_img), img_arr))
+hue_img = list(map(lambda hsv_img : hsv_img[:,:,0], hsv_img_arr))
+
+#count red pixels
+for i, hue in enumerate(hue_img):
+    cur = 0
+    for row in hue:
+        for pixel in row:
+            if pixel > 0.95 or pixel < 0.04:
+                cur += 1
+    covariate[i] = int(cur)
 
 #normalize our covariate
 q= covariate / np.sum(covariate)
-
 
 N = 169 #total number of images
 true_total_strawberries = groundTruth()
 F = true_total_strawberries
 
-#TODO: modify this code so that each k will be running with 100 trials, return (k, mean_of_all_error_trials)
-def run_dis_count(k, trials = 1000):
+def run_is_count(k, trials = 1000):
     error_rates = []
-    print(f"______DISCOUNT RUN WITH K = {k}______")
+    print(f"______ISCOUNT RUN WITH K = {k}______")
     for _ in range(trials):
         samples = list(np.random.choice(np.arange(N), k, p = q, replace = True))
-        sampled_image = [dectetorResult[x]["image_id"] for x in samples]
+        sampled_image = [image_strawberries_ids[x] for x in samples]
         
-        f_s_i = [int(dectetorResult[x]["true_count"]) for x in samples]
+        f_s_i = [int(image_data[x]["true_count"]) for x in samples]
 
         #!Formula to calculate error rate, CI are copied from Guastavo's tutorial
         w_bar = 0
@@ -54,13 +61,6 @@ def run_dis_count(k, trials = 1000):
     mean_error = np.mean(error_rates)
     print(f"Mean Error rate for {k}:", mean_error)
     return (k, mean_error)
-    
-    # And here we calculate the error
-    # Error = np.abs(F - F_hat)/F
-    # print('Error rate: %.2f%%'%(Error*100.))
-    # print('Estimate: %d \u00B1 %d'%(F_hat, CI))
-    # return (k , Error * 100)
-
 
 k_coordinates = []
 error_rate_coordiantes = []
@@ -70,21 +70,9 @@ set_of_k_values = [3, 5, 10, 12, 15, 17, 21, 25, 27, 30, 33, 38, 41, 45, 48, 51,
 
 
 for k in set_of_k_values:
-    cur = run_dis_count(k)
+    cur = run_is_count(k)
     k_coordinates.append(cur[0])
     error_rate_coordiantes.append(cur[1])
-
-
-
-
-
-
-
-    
-def run_is_iscount_w_cov(k, trials = 1000):
-    error_rates = []
-    print(f"______DISCOUNT RUN WITH K = {k}______")
-
 
 
 fig, axes = plt.subplots(1, 1, figsize = (15, 15))
