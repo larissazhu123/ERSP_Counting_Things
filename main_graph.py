@@ -83,7 +83,7 @@ def run_3_method(k, trials = 1000):
     return (k, np.mean(monte_carlo_error_rates), np.mean(is_count_error_rates), np.mean(discount_error_rates))
 
 
-k_vals = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+k_vals = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70]
 k_coordinates = []
 monte_carlo_error_rates = []
 is_count_error_rates = []
@@ -97,9 +97,9 @@ for k in k_vals:
 
 #plotting 
 fig, axes = plt.subplots(1, 1, figsize = (15, 15))
-axes.plot(np.array(k_coordinates), np.array(monte_carlo_error_rates),"ko--", label = "Monte Carlo")
-axes.plot(np.array(k_coordinates), np.array(is_count_error_rates), "kx-", label = "IS Count")
-axes.plot(np.array(k_coordinates), np.array(discount_error_rates), label = "Discount")
+axes.plot(np.array(k_coordinates), np.array(monte_carlo_error_rates),"ko-", color = "red", label = "Monte Carlo")
+axes.plot(np.array(k_coordinates), np.array(is_count_error_rates), "kx-", color = "green", label = "IS Count")
+axes.plot(np.array(k_coordinates), np.array(discount_error_rates), "ko-",label = "Discount")
 axes.set_xlabel("Number of samples verified by humans")
 axes.set_ylabel("Error rate (%)") 
 plt.legend()
